@@ -2,7 +2,8 @@
 Created on 2019年10月21日
 @author: liushucheng
 @brief : 这个脚本是临时用途，仅用来遍历共通化的三个模块(CAN, FR, SPI)中的文件列表,从中提取需要交付的成果物
-       : 来填充safety plan products deliveries中的成果物清单
+       : 来填充safety plan products deliveries中的成果物清单，正确列出需要提交的成果物清单后，以后只需要
+       : 根据成果物清单的路径用get_doc_num..._attachment.py脚本获取文件版本信息即可
 '''
 # coding=utf-8
 import os

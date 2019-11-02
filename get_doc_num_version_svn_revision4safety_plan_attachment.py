@@ -314,8 +314,8 @@ def FetchESTRReport():
     print('--------------------------------- Fetching ESTR last changed revision ------------------------------------------')
     print('****************************************************************************************************************')
 
-    MSN = ['DIO','FLS','MCU','PORT','WDG','ADC','CORTST','ETH','FLSTST','GPT','ICU','LIN','PWM','RAMTST']
-    msn = ['dio','fls','mcu','port','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst']
+    MSN = ['DIO','FLS','MCU','PORT','SPI','WDG','ADC','CORTST','ETH','FLSTST','GPT','ICU','LIN','PWM','RAMTST']
+    msn = ['dio','fls','mcu','port','spi','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst']
 
     # ESTR openpyxl行列从1开始计算
     estr_row_num_version = 18
@@ -358,8 +358,8 @@ def FetchESTRReport():
                     # print(MSN[mod_index] + ',' + str(list_dir_r403[i]) + 'R403 ESTR version,' + version)
                 # pysvn get last changed revision
                 entry = client.info(estr_srcfile_r403)
-                # print(MSN[mod_index] + ',' + entry.name + ',' +  version + ',svn: ' + str(entry.commit_revision.number))
-                print(MSN[mod_index] + ',ESTR,' + entry.url + ',' +  version + ',svn: ' + str(entry.commit_revision.number))
+                print(MSN[mod_index] + ',ESTR,' + entry.name + ',' +  version + ',svn: ' + str(entry.commit_revision.number))
+                # print(MSN[mod_index] + ',ESTR,' + entry.url + ',' +  version + ',svn: ' + str(entry.commit_revision.number))
         # 422 ESTR
         for i in range(len(list_dir_r422)):
             if '.xls' in list_dir_r422[i]:
@@ -383,8 +383,8 @@ def FetchESTRReport():
                     # print(MSN[mod_index] + ',' + str(list_dir_r422[i]) + 'R422 ESTR version,' + version)
                 # pysvn get last changed revision
                 entry = client.info(estr_srcfile_r422)
-                # print(MSN[mod_index] + ',' + entry.name + ',' +  version + ',svn: ' + str(entry.commit_revision.number))
-                print(MSN[mod_index] + ',ESTR,' + entry.url + ',' +  version + ',svn: ' + str(entry.commit_revision.number))
+                print(MSN[mod_index] + ',ESTR,' + entry.name + ',' +  version + ',svn: ' + str(entry.commit_revision.number))
+                # print(MSN[mod_index] + ',ESTR,' + entry.url + ',' +  version + ',svn: ' + str(entry.commit_revision.number))
 
 # *********************************************************************************************************************
 # TSTP版本号以及last changed version信息读取
@@ -570,8 +570,8 @@ def FetchQACReport():
                     # print(MSN[mod_index] + ',' + str(list_qac[i]) + "QAC R403 version," + version)
                 # pysvn get last changed revision
                 entry = client.info(qac_srcfile)
-                # print(MSN[mod_index] + ',' + entry.name + ',' + version + ",svn: " + str(entry.commit_revision.number))
-                print(MSN[mod_index] + ',QAC,' + entry.url + ',' + version + ",svn: " + str(entry.commit_revision.number))
+                print(MSN[mod_index] + ',QAC,' + entry.name + ',' + version + ",svn: " + str(entry.commit_revision.number))
+                # print(MSN[mod_index] + ',QAC,' + entry.url + ',' + version + ",svn: " + str(entry.commit_revision.number))
     # QAC R422
     for mod_index in range(len(MSN)):
         qac_path_r422 = "U:\\internal\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\test_static\\qac\\4.2.2\\"
@@ -593,8 +593,8 @@ def FetchQACReport():
                     # print(MSN[mod_index] + ',' + str(list_qac[i]) + "QAC R422 version," + version)
                 # pysvn get last changed revision
                 entry = client.info(qac_srcfile)
-                # print(MSN[mod_index] + ',' + entry.name + "QAC R422 last changed revision," + str(entry.commit_revision.number))
-                print(MSN[mod_index] + ',QAC,' + entry.url + ',' + version + ",svn: " + str(entry.commit_revision.number))
+                print(MSN[mod_index] + ',QAC,' + entry.name +',' + version + ",svn: " + str(entry.commit_revision.number))
+                # print(MSN[mod_index] + ',QAC,' + entry.url + ',' + version + ",svn: " + str(entry.commit_revision.number))
 
 # *********************************************************************************************************************
 # Fetching Reqtify *.rqtf last changed version (Reqtify 报告中不包含version信息)
@@ -776,6 +776,7 @@ def FetchReqtifyTraceabilityReports():
                     list_reqtify_report_path = os.listdir(reqtify_report_path)
                     for j in range(len(list_reqtify_report_path)):
                         # 由于DIO模块的Justification文件名中的Justificaiton拼写错误，所以为了通配，关键字只用了部分字母
+                        # 由于ADC模块下的文件是without filter的类型,没有取到
                         if 'With_Filter' in list_reqtify_report_path[j]:
                             reqtify_srcfile = reqtify_report_path + list_reqtify_report_path[j]
                             # pysvn get last changed revision
@@ -1020,7 +1021,7 @@ def FetchCoverageInfoSnapshot():
 # *********************************************************************************************************************
 # Safety Analysis Review Checklist last changed revison fetching
 # *********************************************************************************************************************
-def FetchSafetyAnalysisReviewCheclist():
+def FetchSafetyAnalysisReviewChecklist():
     MSN = ['DIO','FLS','MCU','PORT','WDG','ADC','CORTST','ETH','FLSTST','GPT','ICU','LIN','PWM','RAMTST']
     msn = ['dio','fls','mcu','port','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst']
 
@@ -1039,24 +1040,50 @@ def FetchSafetyAnalysisReviewCheclist():
         # print(MSN[index] + ',' + src_file + ',svn: ' + str(entry.commit_revision.number))
         print(MSN[index] + ',FMEA Checlist,' + entry.url + ',svn: ' + str(entry.commit_revision.number))
 
+# *********************************************************************************************************************
+# Change Management Report version information fetching
+# *********************************************************************************************************************
+def FetchChangeManagementReport():
+    MSN = ['DIO','FLS','MCU','PORT','WDG','ADC','Cortst','ETH','Flstst','GPT','ICU','LIN','PWM','RamTst','General']
+    row_version_info = 14
+    col_version_info = 3
+
+    print('****************************************************************************************************************')
+    print('------------------------------- Change Management Report version information -----------------------------------')
+    print('****************************************************************************************************************')
+
+    client = pysvn.Client()
+
+    for index in range(len(MSN)):
+        cm_src_file = "U:\\internal\\X1X\\common_platform\\docs\\Impact_analysis\\F1Kx_Ver4.05.00_Ver42.05.00_ASILB\\F1Kx_V4.05.00.B_" + MSN[index] + "_Change_Management.xlsx"
+        wb_cm = openpyxl.load_workbook(cm_src_file,data_only = True,read_only = True)
+        ws_cm = wb_cm.sheetnames
+        ws_cm_cover = wb_cm[ws_cm[0]]
+        cm_version = ws_cm_cover.cell(row = row_version_info,column = col_version_info).value
+
+        entry = client.info(cm_src_file)
+        print(MSN[index] + ',' + entry.name + ',' + cm_version)
+
+
 # 当我们在命令行运行模块文件时，Python解释器把一个特殊变量__name__置为__main__,
 # 而如果在其他地方导入该模块时，if判断将失败。
 if __name__ == '__main__':
-    FetchSafetyAnalysisReviewCheclist()
-    FetchCoverageInfoSnapshot()
+    # FetchSafetyAnalysisReviewChecklist()
+    # FetchCoverageInfoSnapshot()
     # FetchSafetyPlanAttachmentDeliveriesProducts()
-    FetchPeerReviewMinutes()
-    FetchReqtifyTraceabilityReports()
-    FetchReqtifyUncoveredRequirementsJustificationReport()
-    FetchReqtifyReport()
-    FetchQACReport()
-    FetchTSTRReport()
-    FetchTSTPReport()
-    FetchESTRReport()
-    FetchESTSReport()
-    FetchDFAReport()
-    FetchFMEAReport()
-    FetchTEQReport()
-    FetchUMReport()
-    FetchESDDTSDDReport()
-    FetchUTPUTRReport()
+    # FetchPeerReviewMinutes()
+    # FetchReqtifyTraceabilityReports()
+    # FetchReqtifyUncoveredRequirementsJustificationReport()
+    # FetchReqtifyReport()
+    # FetchQACReport()
+    # FetchTSTRReport()
+    # FetchTSTPReport()
+    # FetchESTRReport()
+    # FetchESTSReport()
+    # FetchDFAReport()
+    # FetchFMEAReport()
+    # FetchTEQReport()
+    # FetchUMReport()
+    # FetchESDDTSDDReport()
+    # FetchUTPUTRReport()
+    FetchChangeManagementReport()

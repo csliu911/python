@@ -4,7 +4,7 @@ Created on 2019年10月25日
 @author: liushucheng
 @brief:  Review议事录中记载的成果物路径没有svn信息，
       :  这个脚本用来获得这个成果物的svn revision信息，
-      :  路径信息需要手动拷贝到指定路径下的文件中
+      :  路径信息需要手动从review议事录中拷贝到指定路径下的文件中
 '''
 # coding=utf-8
 import os
@@ -14,7 +14,7 @@ import pysvn
 svn_cmd_prefix = "TortoiseProc.exe /command:update /path:"
 svn_cmd_suffix = "/closeonend:1"
 
-# 把要获取svn版本号的文件路径保存到这个文件中
+# 把要获取svn版本号的文件路径保存到这个文件中,文件路径需要从review议事录中拷贝
 file_loc_list = "C:\\Users\\liushucheng\\Desktop\\new.txt"
 # 根据从上面文件中读取的文件路径信息构造文件更新脚本文件
 svn_update_cript = "C:\\Users\\liushucheng\\Desktop\\update.bat"
@@ -45,6 +45,8 @@ open_file.close()
 open_file = open(file_loc_list,'r',encoding='utf-8')
 
 client = pysvn.Client()
+
+item_id = 1
 # 遍历文件
 for line,value in enumerate(open_file):
     # 替换路径中的公共部分
@@ -52,6 +54,11 @@ for line,value in enumerate(open_file):
     # 替换路径中的制表回车符号
     value = re.sub(r'\s*\n','',value)
     # print(value)
-    entry = client.info(value)
-    # 打印文件路径及svn版本信息
-    print(value + ',svn revision: ' + str(entry.commit_revision.number))
+    try:
+        entry = client.info(value)
+        # 打印文件路径及svn版本信息
+        print(value + ',ID:' + str(item_id) + ',svn revision: ' + str(entry.commit_revision.number))
+    except:
+        print(value + ' path is not correct.')
+    item_id += 1
+

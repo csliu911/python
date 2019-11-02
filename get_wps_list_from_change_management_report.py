@@ -59,9 +59,9 @@ for wb_index in range(len(msn)):
         print("$$$$destination workbook exist ",dstfile)
         wb = openpyxl.load_workbook("U:\\internal\\X1X\\common_platform\\docs\\Impact_analysis\\F1Kx_Ver4.05.00_Ver42.05.00_ASILB\\F1Kx_V4.05.00.B_" + MSN[wb_index] + "_Change_Management.xlsx")
         print(MSN[wb_index])
-        #获取workbook中所有的表格
+        # 获取workbook中所有的表格
         sheets = wb.sheetnames
-        #提取名称里包含ARDAABD的sheet
+        # 提取名称里包含ARDAABD的sheet
         for ws_index in range(len(sheets)):
             # 取得所有前缀是"ARDAABD-"的tickets
             if PREFIX in sheets[ws_index]:
