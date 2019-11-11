@@ -53,7 +53,7 @@ key_words_1 = "2019"
 key_words_2 = "Peer"
 
 # 部门名称里的关键字包含"Software"
-key_words_3 = "Software"
+key_words_3 = "MCU"
 
 PREFIX = "ARDAABD-"
 
@@ -102,6 +102,8 @@ for i in range(len(msn)):
                             # print(ws_names_of_peer_review_minutes[k])
                             try:
                                 ws_peer_review_minutes = wb_peer_reivew_minutes[ws_names_of_peer_review_minutes[k]]
+                                # write cell,review 修改议事录的公司名称为"Renesas Electronics Corporation"
+                                # ws_peer_review_minutes.cell(row = row_company_name, column = col_company_name).value = 'Renesas Electronics Corporation'
                                 # read cell
                                 department_name = ws_peer_review_minutes.cell(row = row_department_name, column = col_department_name).value
                                 # print(MSN[i] + ',' + list_dir[j] + ',' + ws_names_of_peer_review_minutes[k] + ',department name,' + department_name)

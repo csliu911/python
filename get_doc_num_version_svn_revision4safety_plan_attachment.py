@@ -13,6 +13,8 @@ import openpyxl
 import string
 import docx
 from docx import Document
+import win32com
+from win32com.client import Dispatch
 
 # 文档文书番号所在单元格的行列编号
 row_num_doc_number = 6
@@ -102,8 +104,15 @@ def FetchESDDTSDDReport():
 
     MSN = ['DIO','FLS','MCU','PORT','WDG','ADC','CORTST','ETH','FLSTST','GPT','ICU','LIN','PWM','RAMTST']
     msn = ['dio','fls','mcu','port','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst']
+    # MSN = ['DIO']
+    # msn = ['dio']
 
     client = pysvn.Client()
+    wordApp = Dispatch('Word.Application')
+    # 后台运行，不显示
+    wordApp.Visible = 0 
+    # 不警告
+    wordApp.DisplayAlerts = 0
 
     for mod_index in range(len(MSN)):
         if MSN[mod_index] == 'ETH':
@@ -116,13 +125,23 @@ def FetchESDDTSDDReport():
         list_dir = os.listdir(path)
         for i in range(len(list_dir)):
             # print(list_dir[i])
-            if 'EAAR-SD-' in list_dir[i]:
+            if 'EAAR-SD-' in list_dir[i] and 'ESDD' in list_dir[i]:
                 esdd_srcfile = path + list_dir[i]
+                doc = wordApp.Documents.Open(FileName = esdd_srcfile)
+                print('-----------------')
+                print('段落数： ',doc.Paragraphs.count)
+                for k in range(len(doc.Paragraphs)):
+                    para = doc.Paragraphs[k]
+                    if 'Rev.' in para.Range.text:
+                        print(para.Range.text)
+                        break
+                    else:
+                        pass
                 # print(esdd_srcfile)
                 entry = client.info(esdd_srcfile)
                 # print(MSN[mod_index] + ',' + entry.name + ",ESDD last changed revision: ,svn: " + str(entry.commit_revision.number))
                 print(MSN[mod_index] + ',ESDD,' + entry.url + ",svn: " + str(entry.commit_revision.number))
-
+                doc.Close()
     for mod_index in range(len(MSN)):
         if MSN[mod_index] == 'ETH':
             path = "U:\\internal\\X1X\\common_platform\\modules\\" + msn[mod_index] + "\\docs\\sds\\"
@@ -531,7 +550,7 @@ def FetchTSTRReport():
                 print(MSN[mod_index] + ',TSTR,' + entry.url + ',' + version + ',svn: ' + str(entry.commit_revision.number))
 
 # *********************************************************************************************************************
-# QAC 版本号以及last changed version信息读取
+# QAC 版本号以及last changed version信息读取 （QAC2004 以及 QAC2012)
 # *********************************************************************************************************************
 def FetchQACReport():
     print('****************************************************************************************************************')
@@ -548,8 +567,8 @@ def FetchQACReport():
     qac_xls_col_num_version = 1
 
     client = pysvn.Client()
-
-    # QAC R403
+    print(">>> QAC 2004 AR403 Report")
+    # QAC(2004) R403
     for mod_index in range(len(MSN)):
         qac_path_r403 = "U:\\internal\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\test_static\\qac\\4.0.3\\"
         list_qac = os.listdir(qac_path_r403)
@@ -572,7 +591,8 @@ def FetchQACReport():
                 entry = client.info(qac_srcfile)
                 print(MSN[mod_index] + ',QAC,' + entry.name + ',' + version + ",svn: " + str(entry.commit_revision.number))
                 # print(MSN[mod_index] + ',QAC,' + entry.url + ',' + version + ",svn: " + str(entry.commit_revision.number))
-    # QAC R422
+    print(">>> QAC 2004 AR422 Report")
+    # QAC(2004) R422
     for mod_index in range(len(MSN)):
         qac_path_r422 = "U:\\internal\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\test_static\\qac\\4.2.2\\"
         list_qac = os.listdir(qac_path_r422)
@@ -594,6 +614,54 @@ def FetchQACReport():
                 # pysvn get last changed revision
                 entry = client.info(qac_srcfile)
                 print(MSN[mod_index] + ',QAC,' + entry.name +',' + version + ",svn: " + str(entry.commit_revision.number))
+                # print(MSN[mod_index] + ',QAC,' + entry.url + ',' + version + ",svn: " + str(entry.commit_revision.number))
+    print(">>> QAC 2012 AR403 Report")
+    # QAC(2012) R403
+    for mod_index in range(len(MSN)):
+        qac_path_r403 = "U:\\internal\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\test_static\\qac_misra2012\\4.0.3\\"
+        list_qac = os.listdir(qac_path_r403)
+        for i in range(len(list_qac)):
+            if 'Metrics.xls' in list_qac[i]:
+                qac_srcfile = qac_path_r403 + list_qac[i]
+                try:
+                    wb_qac = openpyxl.load_workbook(qac_srcfile,data_only = True,read_only = True)
+                    ws_qac = wb_qac.sheetnames
+                    ws_qac_cover = wb_qac[ws_qac[0]]
+                    version = ws_qac_cover.cell(row = qac_row_num_version,column = qac_col_num_version).value
+                    # print(MSN[mod_index] + ',' + str(list_qac[i]) + "QAC R403 version," + version)
+                except:
+                    wb_qac = xlrd.open_workbook(qac_srcfile)
+                    ws_qac_cover = wb_qac.sheet_by_index(0)
+                    # 从版本号的记录位置读取版本号信息
+                    version = ws_qac_cover.cell(qac_xls_row_num_version,qac_xls_col_num_version).value
+                    # print(MSN[mod_index] + ',' + str(list_qac[i]) + "QAC R403 version," + version)
+                # pysvn get last changed revision
+                entry = client.info(qac_srcfile)
+                print(MSN[mod_index] + ',QAC 2012,' + entry.name + ',' + version + ",svn: " + str(entry.commit_revision.number))
+                # print(MSN[mod_index] + ',QAC,' + entry.url + ',' + version + ",svn: " + str(entry.commit_revision.number))
+    print(">>> QAC 2012 AR422 Report")
+    # QAC(2012) R422
+    for mod_index in range(len(MSN)):
+        qac_path_r422 = "U:\\internal\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\test_static\\qac_misra2012\\4.2.2\\"
+        list_qac = os.listdir(qac_path_r422)
+        for i in range(len(list_qac)):
+            if 'Metrics.xls' in list_qac[i]:
+                qac_srcfile = qac_path_r422 + list_qac[i]
+                try:
+                    wb_qac = openpyxl.load_workbook(qac_srcfile,data_only = True,read_only = True)
+                    ws_qac = wb_qac.sheetnames
+                    ws_qac_cover = wb_qac[ws_qac[0]]
+                    version = ws_qac_cover.cell(row = qac_row_num_version,column = qac_col_num_version).value
+                    # print(MSN[mod_index] + ',' + str(list_qac[i]) + "QAC R422 version," + version)
+                except:
+                    wb_qac = xlrd.open_workbook(qac_srcfile)
+                    ws_qac_cover = wb_qac.sheet_by_index(0)
+                    # 从版本号的记录位置读取版本号信息
+                    version = ws_qac_cover.cell(qac_xls_row_num_version,qac_xls_col_num_version).value
+                    # print(MSN[mod_index] + ',' + str(list_qac[i]) + "QAC R422 version," + version)
+                # pysvn get last changed revision
+                entry = client.info(qac_srcfile)
+                print(MSN[mod_index] + ',QAC 2012,' + entry.name +',' + version + ",svn: " + str(entry.commit_revision.number))
                 # print(MSN[mod_index] + ',QAC,' + entry.url + ',' + version + ",svn: " + str(entry.commit_revision.number))
 
 # *********************************************************************************************************************
@@ -865,16 +933,17 @@ def FetchReqtifyTraceabilityReports():
                             print(MSN[mod_index] + ',ReqtifyTraceability,' + entry.url + ',svn: ' + str(entry.commit_revision.number))
 
 # *********************************************************************************************************************
-# Fetching Peer Review Minutes report last changed version (confirm only the doc number at cover sheet)
+# Fetching Peer Review Minutes report last changed version (confirm the doc number only at cover sheet)
 # *********************************************************************************************************************
 def FetchPeerReviewMinutes():
     print('****************************************************************************************************************')
     print('------------------ Fetching Peer Review Minutes report last changed revision -----------------------------------')
     print('****************************************************************************************************************')
 
-    MSN = ['DIO','FLS','MCU','PORT','WDG','ADC','CORTST','ETH','FLSTST','GPT','ICU','LIN','PWM','RAMTST','GENERAL']
-    msn = ['dio','fls','mcu','port','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst','general']
-
+    # MSN = ['DIO','FLS','MCU','PORT','WDG','ADC','CORTST','ETH','FLSTST','GPT','ICU','LIN','PWM','RAMTST','GENERAL']
+    # msn = ['dio','fls','mcu','port','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst','general']
+    MSN = ['RAMTST']
+    msn = ['ramtst']
     # document number location U3
     row_num_document_number = 3
     col_num_document_number = 21
@@ -898,19 +967,25 @@ def FetchPeerReviewMinutes():
             # pysvn get last changed revision and url
             entry = client.info(peer_reivew_minutes_srcfile)
             # print(MSN[mod_index] + ',' + str(list_peer_review_minutes[i]) + ',' + str(doc_number) + ',' + str(entry.url) + ',' + 'svn:' + str(entry.commit_revision.number))
-            print(MSN[mod_index] + ',PeerReviewMinutes,' + entry.url + ',' + str(doc_number) + ',' + 'svn:' + str(entry.commit_revision.number))
+            print(MSN[mod_index] + ',PeerReviewMinutes,' + entry.name + ',' + str(doc_number) + ',' + 'svn:' + str(entry.commit_revision.number))
             
 
 # *********************************************************************************************************************
 # Fetching Safety Plan Attachment Deliveries Products version and last changed revision.
+# 首先从SafetyPlan Attachment中拷贝模块的成果物路径，保存为一个文件。创建一个批处理文件对这些文件进行更新。
+# 运行脚本提取文件列表中各文件的版本信息及SVN revision信息。
 # *********************************************************************************************************************
 def FetchSafetyPlanAttachmentDeliveriesProducts():
     print('****************************************************************************************************************')
     print('---------------- Fetching Safety Plan Attachment Deliveries Products last changed revision ---------------------')
     print('****************************************************************************************************************')
 
-    # msn = ['dio','fls','mcu','port','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst','general','can','spi','fr']
-    msn = ['can','spi','fr']
+    # 用于构造SVN更新的批处理文件
+    svn_cmd_prefix = "TortoiseProc.exe /command:update /path:"
+    svn_cmd_suffix = "/closeonend:1"
+
+    msn = ['dio','fls','mcu','port','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst','general','can','spi','fr']
+    # msn = ['can','spi','fr']
 
     client = pysvn.Client()
 
@@ -959,7 +1034,7 @@ def FetchSafetyPlanAttachmentDeliveriesProducts():
                             # 未成功匹配到版本号(文件版本的记录方式不标准)
                             else:
                                 print(wps_path_line + ',' + entry.name + ',' + entry.url + ', Regex Match Failed. Version format is not standard. ' + '(SVN:' + str(entry.commit_revision.number) + ')')
-                    # 如果文件不存在
+                    # 如果文件不存在，此时的entry.name和entry.url都是上一个文件的结果
                     else:
                         print(wps_path_line + ',' + entry.name + ',' + entry.url + ', No such file or directory')
                 # 空行直接输出空行
@@ -1071,7 +1146,7 @@ if __name__ == '__main__':
     # FetchSafetyAnalysisReviewChecklist()
     # FetchCoverageInfoSnapshot()
     # FetchSafetyPlanAttachmentDeliveriesProducts()
-    # FetchPeerReviewMinutes()
+    FetchPeerReviewMinutes()
     # FetchReqtifyTraceabilityReports()
     # FetchReqtifyUncoveredRequirementsJustificationReport()
     # FetchReqtifyReport()
@@ -1086,4 +1161,4 @@ if __name__ == '__main__':
     # FetchUMReport()
     # FetchESDDTSDDReport()
     # FetchUTPUTRReport()
-    FetchChangeManagementReport()
+    # FetchChangeManagementReport()
