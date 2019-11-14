@@ -26,8 +26,8 @@ MSN = ['FLSTST']#used only in debug mode
 # 保存查询结果的文件
 inspection_result_file = "C:\\Users\\liushucheng\\Desktop\\check_result\\peer_review_minutes_inspection_result.xlsx"
 
-
-if os.path.exists(inspection_result_file):#记录审查结果的文件已经存在
+# 记录审查结果的文件已经存在
+if os.path.exists(inspection_result_file):
     wb_dstfile = openpyxl.load_workbook(inspection_result_file)
     #returns a list of the names of worksheets in this workbook
     ws_dstfile = wb_dstfile.sheetnames
@@ -35,7 +35,8 @@ if os.path.exists(inspection_result_file):#记录审查结果的文件已经存�
     #return a worksheet by its name
     ws_written = wb_dstfile[ws_dstfile[0]]#get worksheet by name
     print('>>>> ' + str(ws_written) + ' in ' + inspection_result_file + ' is to be written to.')
-else:#记录审查结果的文件不存在
+# 记录审查结果的文件不存在
+else:
     print('>>>> ' + str(dstfile) + " does not exsit.")
 
 
@@ -90,38 +91,22 @@ for i in range(len(msn)):
             # 在review议事录的名称中查询到了变更管理表中记录的要变更的ticket名称
             if list_ws_names_of_cm_file[index] in list_dir[j]:
                 try:
-                    wb_peer_reivew_minutes = openpyxl.load_workbook(peer_review_minutes_path + list_dir[j],read_only = False,data_only = False,keep_vba = True)
+                    wb_peer_reivew_minutes = openpyxl.load_workbook(peer_review_minutes_path + list_dir[j],read_only = True,data_only = True,keep_vba = False)
                     # 获取review议事录工作簿中所有的工作表
                     ws_names_of_peer_review_minutes = wb_peer_reivew_minutes.sheetnames
-                    # print(">>>> worksheet name list: " + str(ws_names_of_peer_review_minutes))
                     # 遍历review议事录工作簿中所有的工作表
                     for k in range(len(ws_names_of_peer_review_minutes)):
-                        # print(">>>> worksheet name: " + ws_names_of_peer_review_minutes[k])
                         # 如果工作表是有效的review工作表(非cover、revision history等辅助工作表)
                         if key_words_1 in ws_names_of_peer_review_minutes[k] or key_words_2 in ws_names_of_peer_review_minutes[k]:
-                            # print(ws_names_of_peer_review_minutes[k])
                             try:
                                 ws_peer_review_minutes = wb_peer_reivew_minutes[ws_names_of_peer_review_minutes[k]]
-                                # write cell,review 修改议事录的公司名称为"Renesas Electronics Corporation"
-                                # ws_peer_review_minutes.cell(row = row_company_name, column = col_company_name).value = 'Renesas Electronics Corporation'
                                 # read cell
                                 department_name = ws_peer_review_minutes.cell(row = row_department_name, column = col_department_name).value
-                                # print(MSN[i] + ',' + list_dir[j] + ',' + ws_names_of_peer_review_minutes[k] + ',department name,' + department_name)
-                                if key_words_3 in department_name:
-                                    print(MSN[i] + ',' + list_dir[j] + ',' + ws_names_of_peer_review_minutes[k] + ',department name,' + department_name)
-                                else:
-                                    # write cell, modify department name if the department name is incorrect(openpyxl 3.0 and later works)
-                                    ws_peer_review_minutes.cell(row = row_department_name, column = col_department_name).value = 'Automotive MCU Software Department'
-                                    # read cell
-                                    department_name = ws_peer_review_minutes.cell(row = row_department_name, column = col_department_name).value
-                                    print(MSN[i] + ',' + list_dir[j] + ',' + ws_names_of_peer_review_minutes[k] + ',department name,' + department_name + ', department name modified')
+                                print(MSN[i] + ',' + list_dir[j] + ',' + ws_names_of_peer_review_minutes[k] + ',department name,' + department_name)
                             except:
                                 print(">>>> worksheet name: " + ws_names_of_peer_review_minutes[k] + " department name read failed.")
                         else:
                             pass
-                        wb_peer_reivew_minutes.save(peer_review_minutes_path + list_dir[j])
-                        # wb_peer_reivew_minutes.save(list_dir[j])
-                        wb_peer_reivew_minutes.close()
                 except:
                     status = ">>>> Load failed. Visual confirmation is necessary." # 文件打开失败的提示，需要手动确认
                     print(status)

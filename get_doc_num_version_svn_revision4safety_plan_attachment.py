@@ -162,6 +162,7 @@ def FetchESDDTSDDReport():
 
 # *********************************************************************************************************************
 # Fetching EUM and TUM last changed version
+# external 文件夹下的user manual 和 internal 文件夹下的user manual内容是相同的，所以抽取internal文件夹下的user manual信息即可
 # *********************************************************************************************************************
 def FetchUMReport():
     print('****************************************************************************************************************')
@@ -172,20 +173,61 @@ def FetchUMReport():
     msn = ['dio','fls','mcu','port','wdg','adc','cortst','eth','flstst','gpt','icu','lin','pwm','ramtst']
 
     client = pysvn.Client()
-
     for mod_index in range(len(MSN)):
         # get last changed revision of CUM in external folder
-        cum_srcfile_external = "U:\\external\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\user_manual\\AUTOSAR_" + MSN[mod_index] + "_Component_UserManual.pdf"
-        entry = client.info(cum_srcfile_external)
+        cum_srcfile_internal = "U:\\internal\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\docs\\user_manual\\AUTOSAR_" + MSN[mod_index] + "_Component_UserManual.docx"
+        entry = client.info(cum_srcfile_internal)
+        try:
+            docx_file = Document(cum_srcfile_internal)
+            for para in docx_file.paragraphs:
+                if 'Ver.' in para.text:
+                    regex = re.search(r'Ver.\d+.\d+.\d+',para.text)
+                    # # 没有匹配成功的，re.search()返回None
+                    if regex != None:
+                        # 正则表达式中，group()用来提取分组截获的字符串,()用来分组, group() 同group(0)就是匹配正则表达式整体结果
+                        print(MSN[mod_index] + ',CUM,Version,' + str(regex.group()))
+                    else:
+                        pass
+                elif 'Rev.' in para.text:
+                    regex = re.search(r'Rev.\d+.\d+',para.text)
+                    if regex != None:
+                        print(MSN[mod_index] + ',CUM,Revision,' + str(regex.group()))
+                    else:
+                        pass
+                else:
+                    pass
+        except:
+            print('>>>> ' + MSN[mod_index] + ' Error occured.')
         # print(MSN[mod_index] + ',' + entry.name + ",EUM last changed revision, svn: " + str(entry.commit_revision.number))
-        print(MSN[mod_index] + ',EUM,' + entry.url + ",svn: " + str(entry.commit_revision.number))
+        # print(MSN[mod_index] + ',EUM,' + entry.url + ",svn: " + str(entry.commit_revision.number))
 
     for mod_index in range(len(MSN)):
         # get last changed revision of TUM in external folder
-        tum_srcfile_external = "U:\\external\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\user_manual\\AUTOSAR_" + MSN[mod_index] + "_Tool_UserManual.pdf"
-        entry = client.info(tum_srcfile_external)
+        tum_srcfile_internal = "U:\\internal\\X1X\\F1x\\modules\\" + msn[mod_index] + "\\docs\\user_manual\\AUTOSAR_" + MSN[mod_index] + "_Tool_UserManual.docx"
+        entry = client.info(tum_srcfile_internal)
+        try:
+            docx_file = Document(tum_srcfile_internal)
+            for para in docx_file.paragraphs:
+                if 'Ver.' in para.text:
+                    regex = re.search(r'Ver.\d+.\d+.\d+',para.text)
+                    # 没有匹配成功的，re.search()返回None
+                    if regex != None:
+                        # 正则表达式中，group()用来提取分组截获的字符串,()用来分组, group() 同group(0)就是匹配正则表达式整体结果
+                        print(MSN[mod_index] + ',TUM,Version,' + str(regex.group()))
+                    else:
+                        pass
+                elif 'Rev.' in para.text:
+                    regex = re.search(r'Rev.\d+.\d+',para.text)
+                    if regex != None:
+                        print(MSN[mod_index] + ',TUM,Revision,' + str(regex.group()))
+                    else:
+                        pass
+                else:
+                    pass
+        except:
+            print('>>>> ' + MSN[mod_index] + ' Error occured.')
         # print(MSN[mod_index] + ',' + entry.name + ",TUM last changed revision, svn: " + str(entry.commit_revision.number))
-        print(MSN[mod_index] + ',TUM,' + entry.url + ",svn: " + str(entry.commit_revision.number))
+        # print(MSN[mod_index] + ',TUM,' + entry.url + ",svn: " + str(entry.commit_revision.number))
 
 # *********************************************************************************************************************
 # Fetching TEQ report last changed version
@@ -1146,7 +1188,7 @@ if __name__ == '__main__':
     # FetchSafetyAnalysisReviewChecklist()
     # FetchCoverageInfoSnapshot()
     # FetchSafetyPlanAttachmentDeliveriesProducts()
-    FetchPeerReviewMinutes()
+    # FetchPeerReviewMinutes()
     # FetchReqtifyTraceabilityReports()
     # FetchReqtifyUncoveredRequirementsJustificationReport()
     # FetchReqtifyReport()
@@ -1156,7 +1198,7 @@ if __name__ == '__main__':
     # FetchESTRReport()
     # FetchESTSReport()
     # FetchDFAReport()
-    # FetchFMEAReport()
+    FetchFMEAReport()
     # FetchTEQReport()
     # FetchUMReport()
     # FetchESDDTSDDReport()
